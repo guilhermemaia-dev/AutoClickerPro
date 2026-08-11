@@ -26,6 +26,7 @@ class MainView(ctk.CTk):
             pass
 
         self.click_option = ctk.StringVar(value="true")
+        self.repeat_til_stopped = ctk.StringVar(value="true")
 
         self.main_container = MainWindowFrame(self, window=self, corner_radius=16, border_width=1, border_color="#ff4757", fg_color="#171427")
         self.main_container.pack(fill="both", expand=True)
@@ -35,13 +36,13 @@ class MainView(ctk.CTk):
         self.getters_box_color = "#313038"
 
         self.frame1 = Frame1(self.main_container, click_option_var=self.click_option, getters_box_color=self.getters_box_color)
-        self.frame1.pack(side="top", fill="x", padx=15, pady=8)
+        self.frame1.pack(side="top", fill="x", padx=15, pady=4)
 
-        self.frame2 = Frame2(self.main_container, getters_box_color=self.getters_box_color)
-        self.frame2.pack(side="top", fill="x", padx=15, pady=8)
+        self.frame2 = Frame2(self.main_container, repeat_til_stopped_var=self.repeat_til_stopped,getters_box_color=self.getters_box_color)
+        self.frame2.pack(side="top", fill="x", padx=15, pady=4)
 
         self.frame3 = Frame3(self.main_container)
-        self.frame3.pack(side="top", fill="x", padx=15, pady=8)
+        self.frame3.pack(side="top", fill="x", padx=15, pady=4)
 
         self.btn_start = self.frame3.btn_start
         self.btn_stop = self.frame3.btn_stop
@@ -54,16 +55,26 @@ class MainView(ctk.CTk):
         self.entry_millis = self.frame1.entry_millis
         self.entry_random_millis_start = self.frame1.entry_random_millis_start
         self.entry_random_millis_end = self.frame1.entry_random_millis_end
+        self.entry_repeat_times = self.frame2.entry_repeat_times
+
+        self.bind_all("<Button-1>", self.clear_focus)
+
+    def clear_focus(self, event):
+        widget = event.widget
+        widget_class = str(widget.winfo_class()).lower()
+
+        if "entry" not in widget_class:
+            self.focus()
 
 
     def show_warning(self, message):
         warning = ctk.CTkFrame(self.main_container, fg_color="#f34b59", corner_radius=8)
-        warning.place(relx=0.5, rely=0.07, anchor="center")
+        warning.place(relx=0.45, rely=0.055, anchor="center")
 
         warning.lift()
 
         lbl_warning = ctk.CTkLabel(warning, text=message, text_color="white", font=("Arial", 11, "bold"))
-        lbl_warning.pack(padx=15, pady=6)
+        lbl_warning.pack(padx=10, pady=5)
 
         self.after(1000, warning.destroy)
 
@@ -132,4 +143,11 @@ class MainView(ctk.CTk):
             self.main_container.configure(border_color="#ff0055", border_width=1)
             self.btn_start.configure(state="normal")
             self.btn_stop.configure(state="disabled")
+
+    def validate_number(self, text):
+        if text == "" or text.isdigit():
+            return True
+        
+        self.winfo_toplevel().show_warning("ONLY NUMBERS!")
+        return False
 
