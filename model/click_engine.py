@@ -32,14 +32,18 @@ class ClickEngine:
             'o': 0x18, 'p': 0x19, 'q': 0x10, 'r': 0x13, 's': 0x1F, 't': 0x14, 'u': 0x16,
             'v': 0x2F, 'w': 0x11, 'x': 0x2D, 'y': 0x15, 'z': 0x2C,
             'space': 0x39, 'shift': 0x2A, 'ctrl': 0x1D, 'alt': 0x38, 'enter': 0x1C,
+            'escape': (0x1B, 0x01), 'backspace': (0x08, 0x0E), 'up': (0x26, 0x48), 
+            'down': (0x28, 0x50), 'left': (0x25, 0x4B), 'right': (0x27, 0x4D),
             '1': 0x02, '2': 0x03, '3': 0x04, '4': 0x05, '5': 0x06,
             '6': 0x07, '7': 0x08, '8': 0x09, '9': 0x0A, '0': 0x0B}
 
-    def start(self, interval_secs=0.1, button="left", click_type="single", rep_times=0, is_random=False, random_start=0.1, random_end=0.2, action_type="click"):
+    def start(self, interval_secs=0.1, button="left", click_type="single", rep_times=0, duration=0, is_random=False, random_start=0.1, random_end=0.2, action_type="click"):
         if not self.running:
             self.mode = "mouse"
             self.action_type = action_type
             self.counter_clicks = 0
+            self.duration = duration
+            self.start_time = time.time()
             self.running = True
 
             self.is_random = is_random
@@ -54,11 +58,13 @@ class ClickEngine:
             self._thread = threading.Thread(target=self._loop, daemon=True)
             self._thread.start()
 
-    def start_keyboard(self, interval_secs=0.1, key_to_press="space", rep_times=0, is_random=False, random_start=0.1, random_end=0.2, action_type="click"):
+    def start_keyboard(self, interval_secs=0.1, key_to_press="space", click_type="single", rep_times=0, duration=0, is_random=False, random_start=0.1, random_end=0.2, action_type="click"):
         if not self.running:
             self.mode = "keyboard"
             self.action_type = action_type
             self.counter_clicks = 0
+            self.duration = duration
+            self.start_time = time.time()
             self.running = True
 
             self.is_random = is_random
@@ -67,6 +73,7 @@ class ClickEngine:
             self.random_end = random_end
 
             self.key_to_press = str(key_to_press).lower()
+            self.click_type = click_type.lower()
             self.rep_times = rep_times
 
             self._thread = threading.Thread(target=self._loop, daemon=True)
@@ -125,12 +132,18 @@ class ClickEngine:
 
 
     def click_keyboard(self):
-        if IS_WINDOWS:
-            self.send_key_event(self.key_to_press, is_down=True)
-            time.sleep(0.02)
-            self.send_key_event(self.key_to_press, is_down=False)
-        else:
-            pyautogui.press(self.key_to_press)
+        press_count = 2 if self.click_type == "double" else 1
+
+        for i in range(press_count):
+            if IS_WINDOWS:
+                self.send_key_event(self.key_to_press, is_down=True)
+                time.sleep(0.02)
+                self.send_key_event(self.key_to_press, is_down=False)
+            else:
+                pyautogui.press(self.key_to_press)
+
+            if press_count > 1 and i == 0:
+                time.sleep(0.08)
 
     def click_mouse(self):
         click_count = 2 if self.click_type == "double" else 1
@@ -154,11 +167,17 @@ class ClickEngine:
             if self.action_type == "hold":
                 self.press_down()
                 while self.running:
+                    if self.duration > 0 and (time.time() - self.start_time) >= self.duration:
+                        break
                     time.sleep(0.05)
                 self.release_all()
+                self.running = False
                 return
 
             while self.running and (self.rep_times <= 0 or self.counter_clicks < self.rep_times):
+                if self.duration > 0 and (time.time() - self.start_time) >= self.duration:
+                    break
+
                 if self.mode == "keyboard":
                     self.click_keyboard()
                 else:
@@ -169,8 +188,8 @@ class ClickEngine:
                 sleep_time = self.get_current_interval()
                 time.sleep(max(0.02, sleep_time))
 
-            self.running = False
-
         except Exception:
+            pass
+        finally:
             self.release_all()
             self.running = False

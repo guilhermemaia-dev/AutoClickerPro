@@ -26,7 +26,7 @@ class MainView(ctk.CTk):
             pass
 
         self.click_option = ctk.StringVar(value="true")
-        self.repeat_til_stopped = ctk.StringVar(value="true")
+        self.repeat_mode = ctk.StringVar(value="until_stopped")
 
         self.main_container = MainWindowFrame(self, window=self, corner_radius=16, border_width=1, border_color="#ff4757", fg_color="#171427")
         self.main_container.pack(fill="both", expand=True)
@@ -38,7 +38,7 @@ class MainView(ctk.CTk):
         self.frame1 = Frame1(self.main_container, click_option_var=self.click_option, getters_box_color=self.getters_box_color)
         self.frame1.pack(side="top", fill="x", padx=15, pady=4)
 
-        self.frame2 = Frame2(self.main_container, repeat_til_stopped_var=self.repeat_til_stopped,getters_box_color=self.getters_box_color)
+        self.frame2 = Frame2(self.main_container, repeat_mode_var=self.repeat_mode, getters_box_color=self.getters_box_color)
         self.frame2.pack(side="top", fill="x", padx=15, pady=4)
 
         self.frame3 = Frame3(self.main_container)

@@ -1,4 +1,5 @@
 import pynput
+import time
 
 class ClickController:
     def __init__(self, model, view):
@@ -36,10 +37,10 @@ class ClickController:
         random_start = 0.1
         random_end = 0.2
 
+        self.initial_timer_str = self.view.frame2.entry_timer.get()
 
         if is_fixed == "false":
             is_random = True
-
             start = int(self.view.entry_random_millis_start.get() or 100)
             end = int(self.view.entry_random_millis_end.get() or 200)
             random_start = start / 1000
@@ -50,13 +51,17 @@ class ClickController:
             if interval is None:
                 return
 
-        repeat_til_stopped = self.view.repeat_til_stopped.get()
+        repeat_mode = self.view.repeat_mode.get()
+        rep_times = 0
+        duration = 0
 
-        if repeat_til_stopped == "true":
-            rep_times = 0
-        else:
+        if repeat_mode == "times":
             rep_times = int(self.view.entry_repeat_times.get() or 0)
-
+        elif repeat_mode == "timer":
+            duration = self.view.frame2.get_timer_secs()
+            if duration <= 0:
+                self.view.show_warning("TIMER MUST BE > 0!")
+                return
 
         mode = self.view.frame2.mode_select.get()
         action_type = self.view.frame2.action_type.get().lower()
@@ -65,18 +70,20 @@ class ClickController:
             key_to_press = self.view.frame2.selected_key
 
             if not key_to_press:
-                self.view.show_warning("SELECT A KEY!")
+                self.view.show_warning("SELECT A VALID KEY!")
                 return
 
             if key_to_press == "f6":
                 self.view.show_warning("F6 IS RESERVED!")
                 return
 
-            self.model.start_keyboard(interval, key_to_press, rep_times, is_random, random_start, random_end, action_type)
+            selected_click_type = self.view.frame2.click_type.get()
+            self.model.start_keyboard(interval, key_to_press, selected_click_type, rep_times, duration, is_random, random_start, random_end, action_type)
         else:
             selected_mouse_button = self.view.frame2.mouse_button_select.get()
             selected_click_type = self.view.frame2.click_type.get()
-            self.model.start(interval, selected_mouse_button, selected_click_type, rep_times, is_random, random_start, random_end, action_type)
+
+            self.model.start(interval, selected_mouse_button, selected_click_type, rep_times, duration, is_random, random_start, random_end, action_type)
 
         self.view.update_status(True)
         self.check_still_running()
@@ -85,9 +92,17 @@ class ClickController:
         self.view.frame2.update_click_display(self.model.counter_clicks)
 
         if self.model.running:
+            if self.view.repeat_mode.get() == "timer":
+                elapsed = time.time() - self.model.start_time
+                remaining_secs = max(0, int(self.model.duration - elapsed))
+                self.view.frame2.update_timer_display(remaining_secs)
+
             self.view.after(100, self.check_still_running)
         else:
             self.view.update_status(False)
+            if self.view.repeat_mode.get() == "timer":
+                self.view.frame2.entry_timer.delete(0, "end")
+                self.view.frame2.entry_timer.insert(0, self.initial_timer_str)
 
 
     def stop_clicking(self):
