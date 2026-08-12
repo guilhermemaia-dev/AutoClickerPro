@@ -1,9 +1,10 @@
 import customtkinter as ctk
 
 class Frame2(ctk.CTkFrame):
-    def __init__(self, master, repeat_mode_var, getters_box_color, **kwargs):
+    def __init__(self, master, repeat_mode_var, location_mode_var, getters_box_color, **kwargs):
         super().__init__(master, fg_color="#191729", corner_radius=12, height=80, **kwargs)
         self.repeat_mode = repeat_mode_var
+        self.location_mode = location_mode_var
         self.getters_box_color = getters_box_color
         self.selected_key = None
 
@@ -23,7 +24,7 @@ class Frame2(ctk.CTkFrame):
     
 
         self.lbl_click_type = ctk.CTkLabel(self, text="Click type")
-        self.lbl_click_type.grid(row=1, column=0, padx=(10,0), pady=8, sticky="w")
+        self.lbl_click_type.grid(row=1, column=0, padx=(10,8), pady=8, sticky="w")
 
         self.click_type = ctk.CTkOptionMenu(self, values=["Single", "Double"], width=95, fg_color=getters_box_color, button_color=getters_box_color, button_hover_color=getters_box_color, corner_radius=10)
         self.click_type.grid(row=1, column=1, padx=10, pady=8)
@@ -35,7 +36,7 @@ class Frame2(ctk.CTkFrame):
 
 
         # REPEAT MODE - TIMES
-        self.radioButton3 = ctk.CTkRadioButton(self, text="Repeat", variable=self.repeat_mode, value="times", border_width_checked=3, border_width_unchecked=3, border_color="#b1a6c7", fg_color="#1f6aa5", width=25, radiobutton_width=20, radiobutton_height=20)
+        self.radioButton3 = ctk.CTkRadioButton(self, text="Repeat", variable=self.repeat_mode, value="times", border_width_checked=2, border_width_unchecked=2, border_color="#b1a6c7", fg_color="#1f6aa5", width=25, radiobutton_width=20, radiobutton_height=20)
         self.radioButton3.grid(row=0, column=2, padx=(0,4), pady=8, sticky="w")
 
         self.entry_repeat_times = ctk.CTkEntry(self, width=60, justify="center", border_width=0, corner_radius=10, validate="key", validatecommand=validate_cmd, fg_color=getters_box_color)
@@ -47,7 +48,7 @@ class Frame2(ctk.CTkFrame):
 
 
         # REPEAT MODE - UNTIL STOPPED
-        self.radioButton4 = ctk.CTkRadioButton(self, text="Repeat Until Stopped", variable=self.repeat_mode, value="until_stopped", border_width_checked=3, border_width_unchecked=3, border_color="#b1a6c7", fg_color="#1f6aa5", width=25, radiobutton_width=20, radiobutton_height=20)
+        self.radioButton4 = ctk.CTkRadioButton(self, text="Repeat Until Stopped", variable=self.repeat_mode, value="until_stopped", border_width_checked=2, border_width_unchecked=2, border_color="#b1a6c7", fg_color="#1f6aa5", width=25, radiobutton_width=20, radiobutton_height=20)
         self.radioButton4.grid(row=1, column=2, columnspan=2, padx=(0,10), pady=8, sticky="w")
 
 
@@ -57,13 +58,13 @@ class Frame2(ctk.CTkFrame):
         lbl_action_type = ctk.CTkLabel(self, text="Mode")
         lbl_action_type.grid(row=2, column=0, padx=(10,0), pady=8, sticky="w")
 
-        self.action_type = ctk.CTkOptionMenu(self, values=["Click", "Hold"], width=95, fg_color=getters_box_color, button_color=getters_box_color, corner_radius=10)
+        self.action_type = ctk.CTkOptionMenu(self, values=["Click", "Hold"], width=95, fg_color=getters_box_color, button_color=getters_box_color, corner_radius=10, button_hover_color=getters_box_color)
         self.action_type.grid(row=2, column=1, padx=10, pady=8)
         self.action_type.set("Click")
 
 
         # REPEAT MODE - TIMER
-        self.radioButton5 = ctk.CTkRadioButton(self, text="Timer", variable=self.repeat_mode, value="timer", border_width_checked=3, border_width_unchecked=3, border_color="#b1a6c7", fg_color="#1f6aa5", width=25, radiobutton_width=20, radiobutton_height=20)
+        self.radioButton5 = ctk.CTkRadioButton(self, text="Timer", variable=self.repeat_mode, value="timer", border_width_checked=2, border_width_unchecked=2, border_color="#b1a6c7", fg_color="#1f6aa5", width=25, radiobutton_width=20, radiobutton_height=20)
         self.radioButton5.grid(row=2, column=2, columnspan=2, padx=(0,10), pady=8, sticky="w")
 
 
@@ -73,6 +74,25 @@ class Frame2(ctk.CTkFrame):
         self.entry_timer.bind("<KeyRelease>", self.format_timer_input)
 
 
+        # CHOOSE LOCATION
+        self.radioButton6 = ctk.CTkRadioButton(self, text="Current Location", variable=self.location_mode, value="current", border_width_checked=2, border_width_unchecked=2, border_color="#b1a6c7", fg_color="#1f6aa5", width=25, radiobutton_width=20, radiobutton_height=20)
+        self.radioButton6.grid(row=3, column=0, padx=(10,8), pady=8, sticky="w")
+
+        self.radioButton7 = ctk.CTkRadioButton(self, text=None, variable=self.location_mode, value="specific", border_width_checked=2, border_width_unchecked=2, border_color="#b1a6c7", fg_color="#1f6aa5", width=25, radiobutton_width=20, radiobutton_height=20)
+        self.radioButton7.grid(row=3, column=1, padx=(10,2), pady=8, sticky="e")
+
+        self.btn_get_coords = ctk.CTkButton(self, text="Get", width=55, corner_radius=10, fg_color=getters_box_color, hover_color="#2b2640")
+        self.btn_get_coords.grid(row=3, column=2, padx=(0,0), pady=8, sticky="w")
+
+        lbl_coords_X = ctk.CTkLabel(self, text="X")
+        lbl_coords_X.grid(row=3, column=2, padx=(0,4), pady=8, sticky="e")
+        self.entry_coords_x = ctk.CTkEntry(self, width=42, justify="center", border_width=0, corner_radius=10, validate="key", validatecommand=validate_cmd, fg_color=getters_box_color)
+        self.entry_coords_x.grid(row=3, column=3, padx=(2,0), pady=8, sticky="w")
+
+        lbl_coords_Y = ctk.CTkLabel(self, text="Y")
+        lbl_coords_Y.grid(row=3, column=3, padx=(0,4), pady=8, sticky="e")
+        self.entry_coords_y = ctk.CTkEntry(self, width=42, justify="center", border_width=0, corner_radius=10, validate="key", validatecommand=validate_cmd, fg_color=getters_box_color)
+        self.entry_coords_y.grid(row=3, column=4, padx=(2,2), pady=8, sticky="w")
 
 
     def format_timer_input(self,event):

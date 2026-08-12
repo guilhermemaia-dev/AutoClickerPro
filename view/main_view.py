@@ -1,8 +1,10 @@
 import customtkinter as ctk
+import tkinter as tk
 from view.components.main_window_frame import MainWindowFrame
 from view.frames.frame1 import Frame1
 from view.frames.frame2 import Frame2
 from view.frames.frame3 import Frame3
+import ctypes
 
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
@@ -27,8 +29,9 @@ class MainView(ctk.CTk):
 
         self.click_option = ctk.StringVar(value="true")
         self.repeat_mode = ctk.StringVar(value="until_stopped")
+        self.location_mode = ctk.StringVar(value="current")
 
-        self.main_container = MainWindowFrame(self, window=self, corner_radius=16, border_width=1, border_color="#ff4757", fg_color="#171427")
+        self.main_container = MainWindowFrame(self, window=self, corner_radius=12, border_width=1, border_color="#ff4757", fg_color="#171427")
         self.main_container.pack(fill="both", expand=True)
 
         self.build_header()
@@ -38,7 +41,7 @@ class MainView(ctk.CTk):
         self.frame1 = Frame1(self.main_container, click_option_var=self.click_option, getters_box_color=self.getters_box_color)
         self.frame1.pack(side="top", fill="x", padx=15, pady=4)
 
-        self.frame2 = Frame2(self.main_container, repeat_mode_var=self.repeat_mode, getters_box_color=self.getters_box_color)
+        self.frame2 = Frame2(self.main_container, repeat_mode_var=self.repeat_mode, location_mode_var=self.location_mode, getters_box_color=self.getters_box_color)
         self.frame2.pack(side="top", fill="x", padx=15, pady=4)
 
         self.frame3 = Frame3(self.main_container)
@@ -56,8 +59,25 @@ class MainView(ctk.CTk):
         self.entry_random_millis_start = self.frame1.entry_random_millis_start
         self.entry_random_millis_end = self.frame1.entry_random_millis_end
         self.entry_repeat_times = self.frame2.entry_repeat_times
+        
+        self.btn_get_coords = self.frame2.btn_get_coords
+        self.entry_coords_x = self.frame2.entry_coords_x
+        self.entry_coords_y = self.frame2.entry_coords_y
+
+        self.tooltip = tk.Toplevel(self)
+        self.tooltip.overrideredirect(True)
+        self.tooltip.attributes("-topmost", True) 
+        self.tooltip.withdraw() 
+        self.tooltip_label = tk.Label(self.tooltip, text="X: 0 Y: 0", bg="#333", fg="white", font=("Arial", 9))
+        self.tooltip_label.pack(ipadx=4, ipady=2)
+
 
         self.bind_all("<Button-1>", self.clear_focus)
+
+        self.after(10, self.set_taskbar_icon)
+
+        
+
 
     def clear_focus(self, event):
         widget = event.widget
@@ -103,16 +123,33 @@ class MainView(ctk.CTk):
         btn_close.pack(side="left")
 
 
+    # method to get the taskbar icon working with the custom header
+    def set_taskbar_icon(self):
+        try:
+            hwnd = ctypes.windll.user32.GetParent(self.winfo_id())
+            GWL_EXSTYLE = -20
+            WS_EX_APPWINDOW = 0x00040000
+            WS_EX_TOOLWINDOW = 0x00000080
+            style = ctypes.windll.user32.GetWindowLongPtrW(hwnd, GWL_EXSTYLE)
+            style = style & ~WS_EX_TOOLWINDOW
+            style = style | WS_EX_APPWINDOW
+            ctypes.windll.user32.SetWindowLongPtrW(hwnd, GWL_EXSTYLE, style)
+            self.withdraw()
+            self.deiconify()
+        except Exception:
+            pass
+
     def minimize_window(self):
-        self.title("Auto Clicker Pro")
+        self.withdraw()
         self.overrideredirect(False)
         self.iconify()
-        self.bind("<FocusIn>", self.on_deiconify)
+        self.bind("<Map>", self.on_deiconify)
 
     def on_deiconify(self, event=None):
-        if self.state() == "normal":
-            self.overrideredirect(True)
-            self.unbind("<FocusIn>")
+        self.unbind("<Map>")
+        self.overrideredirect(True)
+        self.after(10, self.set_taskbar_icon)
+
 
     def animated_status(self):
         if not self.running_state:
@@ -151,3 +188,12 @@ class MainView(ctk.CTk):
         self.winfo_toplevel().show_warning("ONLY NUMBERS!")
         return False
 
+    def show_tooltip(self):
+        self.tooltip.deiconify()
+
+    def hide_tooltip(self):
+        self.tooltip.withdraw()
+
+    def update_tooltip_pos(self, x, y):
+        self.tooltip_label.config(text=f"X: {int(x)} | Y: {int(y)}")
+        self.tooltip.geometry(f"+{int(x) + 15}+{int(y) + 15}")

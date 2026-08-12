@@ -26,6 +26,9 @@ class ClickEngine:
         self.rep_times = 0
         self._thread = None
 
+        self.target_x = None
+        self.target_y = None
+
         self.KEY_MAP = {
             'a': 0x1E, 'b': 0x30, 'c': 0x2E, 'd': 0x20, 'e': 0x12, 'f': 0x21, 'g': 0x22,
             'h': 0x23, 'i': 0x17, 'j': 0x24, 'k': 0x25, 'l': 0x26, 'm': 0x32, 'n': 0x31,
@@ -37,7 +40,7 @@ class ClickEngine:
             '1': 0x02, '2': 0x03, '3': 0x04, '4': 0x05, '5': 0x06,
             '6': 0x07, '7': 0x08, '8': 0x09, '9': 0x0A, '0': 0x0B}
 
-    def start(self, interval_secs=0.1, button="left", click_type="single", rep_times=0, duration=0, is_random=False, random_start=0.1, random_end=0.2, action_type="click"):
+    def start(self, interval_secs=0.1, button="left", click_type="single", rep_times=0, duration=0, is_random=False, random_start=0.1, random_end=0.2, action_type="click", target_x=None, target_y=None):
         if not self.running:
             self.mode = "mouse"
             self.action_type = action_type
@@ -54,6 +57,9 @@ class ClickEngine:
             self.button = button.lower()
             self.click_type = click_type.lower()
             self.rep_times = rep_times
+
+            self.target_x = target_x
+            self.target_y = target_y
 
             self._thread = threading.Thread(target=self._loop, daemon=True)
             self._thread.start()
@@ -123,6 +129,12 @@ class ClickEngine:
         if self.mode == "keyboard":
             self.send_key_event(self.key_to_press, is_down=True)
         else:
+            if self.target_x is not None and self.target_y is not None:
+                if IS_WINDOWS:
+                    ctypes.windll.user32.SetCursorPos(self.target_x, self.target_y)
+                else:
+                    pyautogui.moveTo(self.target_x, self.target_y)
+
             if IS_WINDOWS:
                 events_down = {"right": 0x0008, "middle": 0x0020, "left": 0x0002}
                 down_event = events_down.get(self.button, 0x0002)
@@ -148,12 +160,24 @@ class ClickEngine:
     def click_mouse(self):
         click_count = 2 if self.click_type == "double" else 1
 
+        if self.target_x is not None and self.target_y is not None:
+            if IS_WINDOWS:
+                ctypes.windll.user32.SetCursorPos(self.target_x, self.target_y)
+            else:
+                pyautogui.click(x=self.target_x, y=self.target_y, button=self.button, clicks=click_count)
+                return
+
         if IS_WINDOWS:
             events = {"right": (0x0008, 0x0010), "middle": (0x0020, 0x0040), "left": (0x0002, 0x0004)}
             down_event, up_event = events.get(self.button, events["left"])
 
             for _ in range(click_count):
+                if self.target_x is not None and self.target_y is not None:
+                    ctypes.windll.user32.SetCursorPos(self.target_x, self.target_y)
                 ctypes.windll.user32.mouse_event(down_event, 0, 0, 0, 0)
+
+                if self.target_x is not None and self.target_y is not None:
+                    ctypes.windll.user32.SetCursorPos(self.target_x, self.target_y)
                 ctypes.windll.user32.mouse_event(up_event, 0, 0, 0, 0)
 
                 if click_count > 1:

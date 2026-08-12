@@ -8,7 +8,7 @@ class Frame1(ctk.CTkFrame):
         top_window = self.winfo_toplevel()
         validate_cmd = (self.register(top_window.validate_number), "%P")
 
-        self.radioButton1 = ctk.CTkRadioButton(self, text=None, variable=self.click_option, value="true", border_width_checked=3, border_width_unchecked=3, border_color="#b1a6c7", fg_color="#1f6aa5", width=25, radiobutton_width=20, radiobutton_height=20)
+        self.radioButton1 = ctk.CTkRadioButton(self, text=None, variable=self.click_option, value="true", border_width_checked=2, border_width_unchecked=2, border_color="#b1a6c7", fg_color="#1f6aa5", width=25, radiobutton_width=20, radiobutton_height=20)
         self.radioButton1.grid(row=0, column=0, padx=(10,8), pady=8, sticky="w")
 
         self.entry_hour = ctk.CTkEntry(self, width=60, justify="center", border_width=0, corner_radius=10, validate="key", validatecommand=validate_cmd, fg_color=getters_box_color)
@@ -36,7 +36,7 @@ class Frame1(ctk.CTkFrame):
         lbl_entry_millis.grid(row=0, column=8, padx=(0,12), pady=8)
 
 
-        self.radioButton2 = ctk.CTkRadioButton(self, text="Random Click Interval Between", variable=self.click_option, value="false", border_width_checked=3, border_width_unchecked=3, border_color="#b1a6c7", fg_color="#1f6aa5", width=25, radiobutton_width=20, radiobutton_height=20)
+        self.radioButton2 = ctk.CTkRadioButton(self, text="Random Click Interval Between", variable=self.click_option, value="false", border_width_checked=2, border_width_unchecked=2, border_color="#b1a6c7", fg_color="#1f6aa5", width=25, radiobutton_width=20, radiobutton_height=20)
         self.radioButton2.grid(row=1, column=0, padx=(10,8), pady=8, sticky="w", columnspan=8)
 
         self.entry_random_millis_start = ctk.CTkEntry(self, width=60, justify="center", border_width=0, corner_radius=10, validate="key", validatecommand=validate_cmd, fg_color=getters_box_color)
