@@ -7,6 +7,13 @@ import pyautogui
 IS_WINDOWS = sys.platform.startswith("win")
 if IS_WINDOWS:
     import ctypes
+    try:
+        ctypes.windll.shcore.SetProcessDpiAwareness(2)
+    except Exception:
+        try:
+            ctypes.windll.user32.SetProcessDPIAware()
+        except Exception:
+            pass
 
 class ClickEngine:
     def __init__(self):
@@ -33,11 +40,9 @@ class ClickEngine:
             'a': 0x1E, 'b': 0x30, 'c': 0x2E, 'd': 0x20, 'e': 0x12, 'f': 0x21, 'g': 0x22,
             'h': 0x23, 'i': 0x17, 'j': 0x24, 'k': 0x25, 'l': 0x26, 'm': 0x32, 'n': 0x31,
             'o': 0x18, 'p': 0x19, 'q': 0x10, 'r': 0x13, 's': 0x1F, 't': 0x14, 'u': 0x16,
-            'v': 0x2F, 'w': 0x11, 'x': 0x2D, 'y': 0x15, 'z': 0x2C,
-            'space': 0x39, 'shift': 0x2A, 'ctrl': 0x1D, 'alt': 0x38, 'enter': 0x1C,
-            'escape': (0x1B, 0x01), 'backspace': (0x08, 0x0E), 'up': (0x26, 0x48), 
-            'down': (0x28, 0x50), 'left': (0x25, 0x4B), 'right': (0x27, 0x4D),
-            '1': 0x02, '2': 0x03, '3': 0x04, '4': 0x05, '5': 0x06,
+            'v': 0x2F, 'w': 0x11, 'x': 0x2D, 'y': 0x15, 'z': 0x2C, 'space': 0x39,
+            'shift': 0x2A, 'ctrl': 0x1D, 'alt': 0x38, 'enter': 0x1C,
+            'backspace': 0x0E, '1': 0x02, '2': 0x03, '3': 0x04, '4': 0x05, '5': 0x06,
             '6': 0x07, '7': 0x08, '8': 0x09, '9': 0x0A, '0': 0x0B}
 
     def start(self, interval_secs=0.1, button="left", click_type="single", rep_times=0, duration=0, is_random=False, random_start=0.1, random_end=0.2, action_type="click", target_x=None, target_y=None):
@@ -171,16 +176,11 @@ class ClickEngine:
             events = {"right": (0x0008, 0x0010), "middle": (0x0020, 0x0040), "left": (0x0002, 0x0004)}
             down_event, up_event = events.get(self.button, events["left"])
 
-            for _ in range(click_count):
-                if self.target_x is not None and self.target_y is not None:
-                    ctypes.windll.user32.SetCursorPos(self.target_x, self.target_y)
+            for i in range(click_count):
                 ctypes.windll.user32.mouse_event(down_event, 0, 0, 0, 0)
-
-                if self.target_x is not None and self.target_y is not None:
-                    ctypes.windll.user32.SetCursorPos(self.target_x, self.target_y)
                 ctypes.windll.user32.mouse_event(up_event, 0, 0, 0, 0)
 
-                if click_count > 1:
+                if click_count > 1 and i == 0:
                     time.sleep(0.01)
         else:
             pyautogui.click(button=self.button, clicks=click_count)

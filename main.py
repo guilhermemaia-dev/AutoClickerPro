@@ -6,5 +6,6 @@ if __name__ == "__main__":
     model = ClickEngine()
     view = MainView()
     controller = ClickController(model, view)
+    view.controller = controller
 
     view.mainloop()

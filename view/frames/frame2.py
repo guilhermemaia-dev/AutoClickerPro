@@ -1,4 +1,5 @@
 import customtkinter as ctk
+import config
 
 class Frame2(ctk.CTkFrame):
     def __init__(self, master, repeat_mode_var, location_mode_var, getters_box_color, **kwargs):
@@ -49,11 +50,11 @@ class Frame2(ctk.CTkFrame):
 
         # REPEAT MODE - UNTIL STOPPED
         self.radioButton4 = ctk.CTkRadioButton(self, text="Repeat Until Stopped", variable=self.repeat_mode, value="until_stopped", border_width_checked=2, border_width_unchecked=2, border_color="#b1a6c7", fg_color="#1f6aa5", width=25, radiobutton_width=20, radiobutton_height=20)
-        self.radioButton4.grid(row=1, column=2, columnspan=2, padx=(0,10), pady=8, sticky="w")
+        self.radioButton4.grid(row=1, column=2, columnspan=2, padx=(0,6), pady=8, sticky="w")
 
 
-        self.lbl_clicks_counter = ctk.CTkLabel(self, text="Clicks: 0", font=("Arial", 11, "bold"), text_color="#b1a6c7", width=80, anchor="w")
-        self.lbl_clicks_counter.grid(row=1, column=4, padx=(6,10), pady=8, sticky="w")
+        self.lbl_clicks_counter = ctk.CTkLabel(self, text="Clicks: 0", font=("Arial", 10, "bold"), text_color="#b1a6c7", anchor="w")
+        self.lbl_clicks_counter.grid(row=1, column=4, padx=(0,10), pady=8, sticky="w")
 
         lbl_action_type = ctk.CTkLabel(self, text="Mode")
         lbl_action_type.grid(row=2, column=0, padx=(10,0), pady=8, sticky="w")
@@ -148,24 +149,39 @@ class Frame2(ctk.CTkFrame):
         top_window.unbind("<Key>")
 
         key_name = event.keysym.lower()
+        current_configs = config.load_settings()
+        reserved_key = current_configs.get("hotkey", "F6").lower()
 
-        if key_name == "f6":
+        if key_name == reserved_key:
             self.selected_key = None
             self.btn_key_binder.configure(text="Key: Select Key", fg_color=self.getters_box_color)
-            top_window.show_warning("F6 IS RESERVED!")
+            top_window.show_warning(f"{reserved_key.upper()} IS RESERVED!")
             return
 
         self.selected_key = key_name
         self.btn_key_binder.configure(text=f"Key: {key_name.capitalize()}", fg_color=self.getters_box_color)
-        
 
+
+    def apply_clicks(self, show_clicks):
+        self.show_clicks_active = show_clicks
+
+        if show_clicks:
+            self.lbl_clicks_counter.grid()
+        else:
+            self.lbl_clicks_counter.grid_remove()
 
     def update_click_display(self, count):
-        if count >= 1_000_000:
+        if not getattr(self, "show_clicks_active", True):
+            return
+        
+        if count >= 1_000_000_000:
+            formatted_count = f"{count / 1_000_000_000:.1f}B"
+        elif count >= 1_000_000:
             formatted_count = f"{count / 1_000_000:.1f}M"
-        elif count >= 10_000:
+        elif count >= 1_000:
             formatted_count = f"{count / 1_000:.1f}k"
         else:
             formatted_count = str(count)
 
+        formatted_count = formatted_count.replace(".0", "")
         self.lbl_clicks_counter.configure(text=f"Clicks: {formatted_count}")

@@ -1,5 +1,6 @@
 import pynput
 import time
+import config
 
 class ClickController:
     def __init__(self, model, view):
@@ -9,10 +10,12 @@ class ClickController:
         self.view.btn_start.configure(command=self.start_clicking)
         self.view.btn_stop.configure(command=self.stop_clicking)
 
+        self.reload_configs()
+
         self.shortcut = pynput.keyboard.Listener(on_press=self._on_key_press)
         self.shortcut.start()
 
-        self.view.btn_get_coords.configure(command=self.start_getting_coords)
+        self.view.frame2.btn_get_coords.configure(command=self.start_getting_coords)
 
     def on_mouse_move(self, x, y):
         self.view.after(0, self.view.update_tooltip_pos, x, y)
@@ -58,6 +61,9 @@ class ClickController:
             return None
 
     def start_clicking(self):
+        if self.view.is_settings_open:
+            return
+        
         self.view.unbind("<Key>")
 
         is_fixed = self.view.click_option.get()
@@ -113,8 +119,8 @@ class ClickController:
                 self.view.show_warning("SELECT A VALID KEY!")
                 return
 
-            if key_to_press == "f6":
-                self.view.show_warning("F6 IS RESERVED!")
+            if key_to_press.upper() == self.hotkey:
+                self.view.show_warning(f"{self.hotkey} IS RESERVED!")
                 return
 
             selected_click_type = self.view.frame2.click_type.get()
@@ -156,5 +162,20 @@ class ClickController:
             self.start_clicking()
 
     def _on_key_press(self, key):
-        if key == pynput.keyboard.Key.f6:
+        key_name = str(key).replace("'","").replace("Key.", "").upper()
+
+        if key_name == self.hotkey:
             self.view.after(0, self.toggle)
+
+    def reload_configs(self):
+        current_configs = config.load_settings()
+        self.hotkey = current_configs.get("hotkey", "F6").upper()
+
+        self.view.btn_start.configure(text=f"Start ({self.hotkey})")
+        self.view.btn_stop.configure(text=f"Stop ({self.hotkey})")
+
+        show_border = current_configs.get("border", True)
+        self.view.apply_border(show_border)
+
+        show_clicks = current_configs.get("clicks", True)
+        self.view.frame2.apply_clicks(show_clicks)
