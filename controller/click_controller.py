@@ -1,6 +1,7 @@
 import pynput
 import time
 import config
+from view.components.theme import Colors
 
 class ClickController:
     def __init__(self, model, view):
@@ -31,7 +32,7 @@ class ClickController:
             self.mouse_listener.stop()
             
         self.view.show_tooltip()
-        self.view.btn_get_coords.configure(text="Click...", fg_color="#332d47")
+        self.view.btn_get_coords.configure(text="Click...", fg_color=Colors.BTN_ACTIVE_KEY)
         self.mouse_listener = pynput.mouse.Listener(on_move=self.on_mouse_move, on_click=self.on_mouse_click)
         self.mouse_listener.start()
 
@@ -43,7 +44,7 @@ class ClickController:
         self.view.entry_coords_y.insert(0, str(y))
 
         self.view.location_mode.set("specific")
-        self.view.btn_get_coords.configure(text="Get", fg_color=self.view.getters_box_color)
+        self.view.btn_get_coords.configure(text="Get", fg_color=Colors.BOX_COLOR)
 
     def total_seconds(self):
         try:
@@ -179,3 +180,12 @@ class ClickController:
 
         show_clicks = current_configs.get("clicks", True)
         self.view.frame2.apply_clicks(show_clicks)
+
+        is_dark = current_configs.get("dark_theme", True)
+        self.view.apply_theme(is_dark)
+
+        is_topmost = current_configs.get("topmost", True)
+        self.view.apply_topmost(is_topmost)
+
+        is_safe = current_configs.get("safety_lock", True)
+        self.model.safety_lock = is_safe

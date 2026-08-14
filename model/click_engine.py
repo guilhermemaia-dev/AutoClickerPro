@@ -23,6 +23,7 @@ class ClickEngine:
         self.button = "left"
         self.click_type = "single"
         self.key_to_press = None
+        self.safety_lock = True
 
         self.is_random = False
         self.interval = 0.1
@@ -210,7 +211,8 @@ class ClickEngine:
                 self.counter_clicks += 1
 
                 sleep_time = self.get_current_interval()
-                time.sleep(max(0.02, sleep_time))
+                min_sleep = 0.02 if self.safety_lock else 0.0015
+                time.sleep(max(min_sleep, sleep_time))
 
         except Exception:
             pass

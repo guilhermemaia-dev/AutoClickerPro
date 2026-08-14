@@ -5,10 +5,13 @@ from view.frames.frame1 import Frame1
 from view.frames.frame2 import Frame2
 from view.frames.frame3 import Frame3
 from view.settings_view import SettingsView
+from view.components.theme import Colors
 import ctypes
+import config
 
-ctk.set_appearance_mode("Dark")
-ctk.set_default_color_theme("blue")
+saved_configs = config.load_settings()
+theme = "Dark" if saved_configs.get("dark_theme", True) else "Light"
+ctk.set_appearance_mode(theme)
 
 class MainView(ctk.CTk):
     def __init__(self, controller=None):
@@ -20,9 +23,10 @@ class MainView(ctk.CTk):
         self.title("Auto Clicker Pro")
         self.geometry("500x400")
         self.resizable(False, False)
-        self.attributes("-topmost", True)
-        self.configure(fg_color="#000001")
-        self.wm_attributes("-transparentcolor", "#000001")
+        is_topmost = saved_configs.get("topmost", True)
+        self.attributes("-topmost", is_topmost)
+        self.configure(fg_color="#000000")
+        self.wm_attributes("-transparentcolor", "#000000")
         try:
             self.iconbitmap("assets/autoclicker.ico")
         except Exception:
@@ -32,21 +36,21 @@ class MainView(ctk.CTk):
         self.repeat_mode = ctk.StringVar(value="until_stopped")
         self.location_mode = ctk.StringVar(value="current")
 
-        self.main_container = MainWindowFrame(self, window=self, corner_radius=12, border_width=1, border_color="#ff4757", fg_color="#171427")
+        self.main_container = MainWindowFrame(self, window=self, corner_radius=12, border_width=1, border_color=Colors.BORDER_LASER_STOPPED, fg_color=Colors.BG_MAIN)
         self.main_container.pack(fill="both", expand=True)
 
         self.build_header()
 
-        self.getters_box_color = "#313038"
-
-        self.frame1 = Frame1(self.main_container, click_option_var=self.click_option, getters_box_color=self.getters_box_color)
+        self.frame1 = Frame1(self.main_container, click_option_var=self.click_option)
         self.frame1.pack(side="top", fill="x", padx=15, pady=4)
 
-        self.frame2 = Frame2(self.main_container, repeat_mode_var=self.repeat_mode, location_mode_var=self.location_mode, getters_box_color=self.getters_box_color)
+        self.frame2 = Frame2(self.main_container, repeat_mode_var=self.repeat_mode, location_mode_var=self.location_mode)
         self.frame2.pack(side="top", fill="x", padx=15, pady=4)
 
         self.frame3 = Frame3(self.main_container)
         self.frame3.pack(side="top", fill="x", padx=15, pady=4)
+
+        #SHORTCUTS
 
         self.btn_start = self.frame3.btn_start
         self.btn_stop = self.frame3.btn_stop
@@ -67,11 +71,10 @@ class MainView(ctk.CTk):
 
         self.tooltip = tk.Toplevel(self)
         self.tooltip.overrideredirect(True)
-        self.tooltip.attributes("-topmost", True) 
+        self.tooltip.attributes("-topmost", True)
         self.tooltip.withdraw() 
         self.tooltip_label = tk.Label(self.tooltip, text="X: 0 Y: 0", bg="#333", fg="white", font=("Arial", 9))
         self.tooltip_label.pack(ipadx=4, ipady=2)
-
 
         self.bind_all("<Button-1>", self.clear_focus)
 
@@ -80,7 +83,7 @@ class MainView(ctk.CTk):
         self.is_settings_open = False
 
         
-
+    #METHOD TO CLEAR FOCUS WHEN CLICKING OUTSIDE THE ENTRY
 
     def clear_focus(self, event):
         widget = event.widget
@@ -96,35 +99,35 @@ class MainView(ctk.CTk):
             if "entry" not in widget_class:
                 self.focus()
 
+    #MAIN METHOD FOR DISPLAYING THE WARNINGS
 
     def show_warning(self, message):
-        warning = ctk.CTkFrame(self.main_container, fg_color="#f34b59", corner_radius=8)
+        warning = ctk.CTkFrame(self.main_container, fg_color=Colors.WARNING_BG, corner_radius=8)
         warning.place(relx=0.55, rely=0.055, anchor="center")
 
         warning.lift()
 
-        lbl_warning = ctk.CTkLabel(warning, text=message, text_color="white", font=("Arial", 11, "bold"))
+        lbl_warning = ctk.CTkLabel(warning, text=message, text_color=Colors.TEXT_TITLE, font=("Arial", 11, "bold"))
         lbl_warning.pack(padx=10, pady=5)
 
         self.after(1000, warning.destroy)
 
+    #METHOD TO BUILD THE WHOLE HEADER
 
     def build_header(self):
         title_bar = ctk.CTkFrame(self.main_container, fg_color="transparent", height=35)
         title_bar.pack(fill="x", padx=10, pady=(8, 0))
 
-        lbl_title = ctk.CTkLabel(title_bar, text="Auto Clicker Pro", font=("Arial", 13, "bold"), text_color="#b1a6c7")
+        lbl_title = ctk.CTkLabel(title_bar, text="Auto Clicker Pro", font=("Arial", 13, "bold"), text_color=Colors.TEXT_TITLE)
         lbl_title.pack(side="left", padx=10)
 
 
-      
-        self.btn_config = ctk.CTkButton(title_bar, text="⚙", font=("Segoe UI Symbol", 16), height=14, width=14, corner_radius=6, fg_color="transparent", hover_color="#27243F", command=self.open_settings)
-        self.btn_config.pack(side="left", padx=5)
+        self.btn_config = ctk.CTkButton(title_bar, text="⚙", font=("Segoe UI Symbol", 16), height=14, width=14, corner_radius=6, fg_color="transparent", hover_color=Colors.BTN_HOVER, text_color=Colors.TEXT_TITLE, command=self.open_settings)
+        self.btn_config.place(relx=0.25, rely=-0.063)
 
 
-
-        self.lbl_status = ctk.CTkLabel(title_bar, text="STOPPED", font=("Arial", 14, "bold"), text_color="#e44949", anchor="w")
-        self.lbl_status.pack(side="left", padx=(60,0))
+        self.lbl_status = ctk.CTkLabel(title_bar, text="STOPPED", width=100, font=("Arial", 14, "bold"), text_color=Colors.BORDER_LASER_STOPPED, anchor="w")
+        self.lbl_status.pack(side="left", padx=(90,0))
 
         self.main_container.enable_drag_on(title_bar)
         self.main_container.enable_drag_on(lbl_title)
@@ -134,24 +137,26 @@ class MainView(ctk.CTk):
         window_controls = ctk.CTkFrame(title_bar, fg_color="transparent")
         window_controls.pack(side="right")
 
-        btn_minimize = ctk.CTkButton(window_controls, text="─", width=28, height=28, corner_radius=14,fg_color="#27243F", hover_color="#3b3759", command=self.minimize_window)
+        btn_minimize = ctk.CTkButton(window_controls, text="─", width=28, height=28, corner_radius=14,fg_color=Colors.BTN_HOVER, hover_color=Colors.BTN_HOVER, text_color=Colors.TEXT_NORMAL, command=self.minimize_window)
         btn_minimize.pack(side="left", padx=(0, 6))
 
-        btn_close = ctk.CTkButton(window_controls, text="✕", width=28, height=28, corner_radius=14, fg_color="#27243F", hover_color="#ff4757", command=self.destroy)
+        btn_close = ctk.CTkButton(window_controls, text="✕", width=28, height=28, corner_radius=14, fg_color=Colors.BTN_HOVER, hover_color=Colors.WARNING_BG, text_color=Colors.TEXT_NORMAL, command=self.destroy)
         btn_close.pack(side="left")
 
+    #METHOD TO OPEN THE SETTINGS MENU
 
     def open_settings(self):
         if self.is_settings_open:
             return
 
         self.btn_start.configure(state="disabled")
-        self.settings_win = SettingsView(master_container=self.main_container, master_view=self, getters_box_color=self.getters_box_color)
+        self.settings_win = SettingsView(master_container=self.main_container, master_view=self)
         self.settings_win.place(relx=0.17, rely=0.395, anchor="center")
         self.settings_win.lift()
 
 
-    # method to get the taskbar icon working with the custom header
+    #METHOD TO GET THE TASKBAR ICON WORKING WITH THE CUSTOM HEADER
+
     def set_taskbar_icon(self):
         try:
             hwnd = ctypes.windll.user32.GetParent(self.winfo_id())
@@ -167,6 +172,8 @@ class MainView(ctk.CTk):
         except Exception:
             pass
 
+    #METHOD TO MINIMIZE THE WINDOW WITH THE CUSTOM HEADER
+
     def minimize_window(self):
         self.withdraw()
         self.overrideredirect(False)
@@ -178,6 +185,8 @@ class MainView(ctk.CTk):
         self.overrideredirect(True)
         self.after(10, self.set_taskbar_icon)
 
+    #METHOD TO APPLY THE DYNAMIC BORDER
+
     def apply_border(self, show_border):
         self.show_border_active = show_border
 
@@ -185,6 +194,21 @@ class MainView(ctk.CTk):
             self.main_container.configure(border_width=1)
         else:
             self.main_container.configure(border_width=0)
+
+    #METHOD TO APPLY TOPMOST
+
+    def apply_topmost(self, is_topmost):
+        self.attributes("-topmost", is_topmost)
+
+    #METHOD TO APPLY THE DARK/LIGHT THEME MODE
+
+    def apply_theme(self, is_dark):
+        if is_dark:
+            ctk.set_appearance_mode("Dark")
+        else:
+            ctk.set_appearance_mode("Light")
+
+    #METHOD TO ANIMATE THE STATUS AND THE DYNAMIC BORDER
 
     def animated_status(self):
         if not self.running_state:
@@ -205,6 +229,8 @@ class MainView(ctk.CTk):
         self.status_index += 1
         self.after(100, self.animated_status)
 
+    #METHOD TO UPDATE THE STATUS
+
     def update_status(self, running):
         self.running_state = running
 
@@ -215,11 +241,13 @@ class MainView(ctk.CTk):
             self.btn_config.configure(state="disabled")
             self.animated_status()
         else:
-            self.lbl_status.configure(text="STOPPED", text_color="#e44949")
-            self.main_container.configure(border_color="#ff0055")
+            self.lbl_status.configure(text="STOPPED", text_color=Colors.BORDER_LASER_STOPPED)
+            self.main_container.configure(border_color=Colors.BORDER_LASER_STOPPED)
             self.btn_start.configure(state="normal")
             self.btn_stop.configure(state="disabled")
             self.btn_config.configure(state="normal")
+
+    #METHOD TO VALIDATE IF THE TEXT IS NUMBER OR NOT
 
     def validate_number(self, text):
         if text == "" or text.isdigit():

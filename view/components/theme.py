@@ -1,0 +1,23 @@
+class Colors:
+
+    BG_MAIN = ("#F4F4F6", "#171427")
+    BG_FRAME = ("#FFFFFF", "#191729")
+    
+    TEXT_TITLE = ("#1E1E1E", "#B1A6C7")
+    TEXT_NORMAL = ("#2D2D2D", "#B1A6C7")
+    
+    BOX_COLOR = ("#E6E6E6", "#313038")
+    BOX_HOVER = ("#E2E2E2", "#2B2640")
+
+    BTN_HOVER = ("#DCDCDC", "#27243F")
+    BTN_ACTIVE_KEY = ("#D5D5D5", "#3B3355")
+
+    BTN_START_BG = ("#3B80B4", "#1F6AA5")
+    BTN_START_TEXT = ("#D5D5D5", "#D5D5D5")
+    BTN_STOP_TEXT = ("#D5D5D5", "#D5D5D5")
+    BTN_STOP_BG = ("#EB634B", "#BD2431")
+
+    WARNING_BG = ("#E53935", "#F34B59")
+    BORDER_LASER_STOPPED = ("#E07A7A", "#FF002B")
+    RADIO_BTN = ("#38CCCC", "#1F6AA5")
+    SWITCH_BTN = ("#7FB9B9", "#3D4D94")

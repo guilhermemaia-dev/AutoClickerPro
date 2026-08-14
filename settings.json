@@ -2,5 +2,7 @@
     "border": true,
     "clicks": true,
     "dark_theme": true,
+    "topmost": true,
+    "safety_lock": true,
     "hotkey": "F6"
 }
