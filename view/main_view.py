@@ -8,6 +8,16 @@ from view.settings_view import SettingsView
 from view.components.theme import Colors
 import ctypes
 import config
+import os
+import sys
+
+# FUNCTION TO FIND FILES IN THE PYINSTALLER TEMPORARY FOLDER
+def resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
 
 saved_configs = config.load_settings()
 theme = "Dark" if saved_configs.get("dark_theme", True) else "Light"
@@ -28,7 +38,8 @@ class MainView(ctk.CTk):
         self.configure(fg_color="#000000")
         self.wm_attributes("-transparentcolor", "#000000")
         try:
-            self.iconbitmap("assets/autoclicker.ico")
+            icon_file = resource_path("assets/autoclicker.ico")
+            self.iconbitmap(icon_file)
         except Exception:
             pass
 
