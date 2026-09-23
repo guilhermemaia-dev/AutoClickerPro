@@ -70,7 +70,7 @@ Warning: When starting AutoClickPro.exe, Windows SmartScreen may display a warni
 <br>
 To run the application you have to Press **More Info** and then **Run anyways**
 <br>
-or go to **Windows Settings ➔ Privacy & Security ➔ Windows Security ➔ App & browser control**
+or go to **Windows Settings ➔ Privacy & Security ➔ Windows Security ➔ Virus & threat protection ➔ Virus & threat protection settings ➔ Manage settings ➔ Exclusions ➔ Add or remove exclusions ➔ Add an exclusion** and then put the exe. file
 <br>
 and Adjust or allow the application to run
 
